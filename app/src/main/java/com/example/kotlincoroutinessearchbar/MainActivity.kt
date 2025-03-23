@@ -26,8 +26,8 @@ class MainActivity : ComponentActivity() {
 fun SearchScreen() {
     var text by remember { mutableStateOf("") }
     val itemList = listOf("Alice", "Bob", "Kerolos", "Ali", "Ahmed")
-    val searchQuery = remember { MutableStateFlow("") }
-    
+    val searchQuery = remember { MutableSharedFlow<String>() }
+
     val filteredList by searchQuery
         .map { query -> itemList.filter { it.contains(query, ignoreCase = true) } }
         .collectAsState(initial = itemList)
@@ -38,7 +38,7 @@ fun SearchScreen() {
             query = text,
             onQueryChange = {
                 text = it
-                searchQuery.value = it
+                searchQuery.tryEmit(it)
             },
             onSearch = {},
             active = true,
