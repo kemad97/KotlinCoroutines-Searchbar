@@ -24,37 +24,33 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen() {
-
     var text by remember { mutableStateOf("") }
-    var active by remember { mutableStateOf(false) }
-
     val itemList = listOf("Alice", "Bob", "Kerolos", "Ali", "Ahmed")
-
-    val filteredList by remember(text) {
-        mutableStateOf(itemList.filter { it.contains(text, ignoreCase = true) })
-    }
-
-
+    val searchQuery = remember { MutableStateFlow("") }
+    
+    val filteredList by searchQuery
+        .map { query -> itemList.filter { it.contains(query, ignoreCase = true) } }
+        .collectAsState(initial = itemList)
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         SearchBar(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             query = text,
-            onQueryChange = { text = it },
-            onSearch = { active = false },
-            active = active,
-            onActiveChange = { active = it },
+            onQueryChange = {
+                text = it
+                searchQuery.value = it
+            },
+            onSearch = {},
+            active = true,
+            onActiveChange = {},
             placeholder = { Text("Search") }
-        )
-        {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
+        ) {
+            LazyColumn(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 items(filteredList) { item ->
                     Text(text = item, modifier = Modifier.padding(8.dp))
                 }
             }
-
         }
-
     }
 }
 
